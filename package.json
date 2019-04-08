@@ -1,0 +1,12 @@
+{
+  "name": "pico-build",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "bin": {
+    "pico-build": "index.js"
+  },
+  "dependencies": {
+    "commander": "^2.20.0"
+  }
+}
