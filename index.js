@@ -1,43 +1,48 @@
 #! /usr/bin/env node
 
-const program = require('commander');
-const fs = require('fs');
-const path = require('path');
-
-program
-  .version('0.0.1')
-  .option('-i, --input [folder]', 'The input folder')
-  .option('-o --output [file]', 'The output file')
-  .parse(process.argv);
-
-async function main() {
-  let luaFilePaths = fs
-    .readdirSync(program.input)
-    .filter(file => file.endsWith('.lua'));
-
-  let sources = luaFilePaths.map(filePath => {
-    let content = fs.readFileSync(path.join(program.input, filePath), 'utf8');
-    if (!content.startsWith('--')) {
-      content = `--${filePath.replace('.lua', '')}\n${content}`;
+const argv = require('yargs')
+  .usage('Usage: $0 <command> [options]')
+  .command(
+    'build',
+    'Build lua file(s) into a PICO-8 cart',
+    yargs => {
+      yargs
+        .option('input', {
+          alias: 'i',
+          nargs: 1,
+          describe: 'Path to folder containing lua files',
+          type: 'string',
+          demandOption: true,
+        })
+        .option('output', {
+          alias: 'o',
+          nargs: 1,
+          describe: 'Path to output .p8 file',
+          type: 'string',
+          demandOption: true,
+        })
+        .option('watch', {
+          alias: 'w',
+          type: 'boolean',
+          describe:
+            'Runs the command in watch mode, re-running when a lua file changes',
+        });
+    },
+    argv => {
+      if (argv.watch) {
+        require('./watch.js')(argv);
+      } else {
+        console.log('...building cart');
+        require('./build.js')(argv);
+        console.log('✨  Done! ✨');
+      }
     }
-    return content;
-  });
-
-  let luaSource = sources.join('\n-->8\n');
-
-  if (fs.existsSync(program.output)) {
-    let cart = fs.readFileSync(program.output, 'utf8');
-    let [pre, ...rest] = cart.split('__lua__');
-    let [_, ...moreRest] = rest.join('').split('__gfx__');
-    let outputArr = [pre, '__lua__\n', luaSource, '__gfx__', ...moreRest];
-    let newCartSource = outputArr.join('');
-    fs.writeFileSync(program.output, newCartSource);
-  } else {
-    let pre = `pico-8 cartridge // http://www.pico-8.com\nversion 16\n__lua__\n`;
-    let cartSource = pre + luaSource;
-    fs.writeFileSync(program.output, cartSource);
-  }
-}
-
-main();
-console.log('✨  done!');
+  )
+  .example(
+    '$0 build -i src -o my-cart.p8',
+    'Compile all lua files in src/ into my-cart.p8'
+  )
+  .help('h')
+  .alias('h', 'help')
+  .version()
+  .epilog('Copyright Ian J Sikes 2019').argv;

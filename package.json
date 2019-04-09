@@ -1,12 +1,19 @@
 {
   "name": "pico-build",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "main": "index.js",
   "license": "MIT",
   "bin": {
     "pico-build": "index.js"
   },
   "dependencies": {
-    "commander": "^2.20.0"
+    "chokidar": "^2.1.5",
+    "yargs": "^13.2.2"
+  },
+  "description": "A simple build tool for working with PICO-8 lua files",
+  "repository": "git@github.com:ianjsikes/pico-build.git",
+  "author": "Ian J Sikes <ianjsikes@gmail.com>",
+  "devDependencies": {
+    "@types/memoize-one": "^4.1.1"
   }
 }
