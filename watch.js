@@ -2,6 +2,7 @@ const chokidar = require('chokidar');
 const path = require('path');
 const keypress = require('keypress');
 const boxen = require('boxen');
+const { spawn } = require('child_process');
 const boxenOpts = {
   padding: 1,
   margin: 1,
@@ -10,7 +11,10 @@ const boxenOpts = {
 };
 const chalk = require('chalk');
 const build = require('./build.js');
+const { picoCmd, reloadCart } = require('./utils.js');
 keypress(process.stdin);
+
+let pico_process;
 
 const clearConsole = () => process.stdout.write('\033c');
 
@@ -45,9 +49,35 @@ const runBuild = argv => {
     'o'
   )}pen cart in PICO-8.`;
   console.log(boxen(msg, boxenOpts));
+
+  if (pico_process) {
+    reloadCart();
+  }
 };
 
-module.exports = function(argv) {
+const openCart = argv => {
+  let cmd = argv.executable || picoCmd();
+
+  if (cmd) {
+    if (pico_process) {
+      pico_process.kill('SIGINT');
+      pico_process = undefined;
+    }
+
+    pico_process = spawn(cmd, ['-run', argv.output]);
+    pico_process.stdout.setEncoding('utf8');
+    pico_process.stdout.on('data', chunk => {
+      console.log('PICO8:', chunk);
+    });
+
+    pico_process.on('close', code => {
+      console.log('Closed with code:', code);
+      pico_process = undefined;
+    });
+  }
+};
+
+exports.watch = function(argv) {
   // Run the initial build once
   runBuild(argv);
 
@@ -66,11 +96,10 @@ module.exports = function(argv) {
 
     switch (key.name) {
       case 'b':
-        console.log('rebuilding!');
         runBuild(argv);
         break;
       case 'o':
-        console.log('Opening PICO-8!');
+        openCart(argv);
         break;
     }
   });
