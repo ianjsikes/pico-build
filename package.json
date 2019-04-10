@@ -7,7 +7,10 @@
     "pico-build": "index.js"
   },
   "dependencies": {
+    "boxen": "^3.1.0",
+    "chalk": "^2.4.2",
     "chokidar": "^2.1.5",
+    "keypress": "^0.2.1",
     "yargs": "^13.2.2"
   },
   "description": "A simple build tool for working with PICO-8 lua files",

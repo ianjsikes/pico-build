@@ -1,4 +1,6 @@
 #! /usr/bin/env node
+const boxen = require('boxen');
+const boxenOpts = { padding: 2, borderColor: 'green', borderStyle: 'round' };
 
 const argv = require('yargs')
   .usage('Usage: $0 <command> [options]')
@@ -34,10 +36,11 @@ const argv = require('yargs')
       } else {
         console.log('...building cart');
         require('./build.js')(argv);
-        console.log('✨  Done! ✨');
+        console.log(boxen('Done!', boxenOpts));
       }
     }
   )
+  .demandCommand(1)
   .example(
     '$0 build -i src -o my-cart.p8',
     'Compile all lua files in src/ into my-cart.p8'
