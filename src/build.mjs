@@ -1,6 +1,18 @@
 import fs from 'fs';
 import path from 'path';
 
+const getTitleComment = (filename) => {
+  let name = filename.split('.')[0]
+  if (filename.test(/^[0-9]\./)) {
+    name = filename.split('.')[1]
+  }
+
+  if (!name) return null
+
+  name = name.replace('-', ' ')
+  return `--${name}`
+}
+
 export default function build(argv) {
   const startTime = Date.now();
   const stats = {};
@@ -20,7 +32,10 @@ export default function build(argv) {
 
     let content = fs.readFileSync(path.join(argv.input, filePath), 'utf8');
     if (!content.startsWith('--')) {
-      content = `--${filePath.replace('.lua', '')}\n${content}`;
+      let comment = getTitleComment(filePath)
+      if (comment) {
+        content = `${comment}\n${content}`
+      }
     }
     return content;
   });
