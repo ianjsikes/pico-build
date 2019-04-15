@@ -13,24 +13,24 @@ const getTabName = (tab, index) => {
   return `${index}.lua`
 }
 
-export default function extract({ cart, dest }) {
+export default function extract(config) {
   const startTime = Date.now();
   const stats = {};
 
-  const cartSrc = fs.readFileSync(cart, 'utf8')
+  const cartSrc = fs.readFileSync(config.cartPath, 'utf8')
   let code = cartSrc.split('__lua__')[1].split('__gfx__')[0]
   let tabs = code.split('-->8\n')
 
   stats.numLuaFiles = tabs.length
   stats.luaFiles = [];
 
-  if (!fs.existsSync(dest)) {
-    mkdirp.sync(dest)
+  if (!fs.existsSync(config.sourceDir)) {
+    mkdirp.sync(config.sourceDir)
   }
 
   tabs.forEach((tab, index) => {
     let name = getTabName(tab, index)
-    let filePath = path.join(dest, name)
+    let filePath = path.join(config.sourceDir, name)
     fs.writeFileSync(filePath, tab)
 
     stats.luaFiles.push({ name, path: filePath })

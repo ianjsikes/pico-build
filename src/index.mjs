@@ -1,14 +1,12 @@
 #!/usr/bin/env node --experimental-modules --no-warnings
 
-import boxen from 'boxen';
 import chalk from 'chalk';
 import yargs from 'yargs';
 
 import watch from './watch.mjs';
 import build from './build.mjs';
 import extract from './extract.mjs';
-
-const boxenOpts = { padding: 2, borderColor: 'green', borderStyle: 'round' };
+import Config from './config.mjs';
 
 // process.stdin.setEncoding('ascii');
 // process.stdin.on('data', chunk => console.log(chunk));
@@ -20,19 +18,17 @@ const argv = yargs
     'Build lua file(s) into a PICO-8 cart',
     yargs => {
       yargs
-        .option('input', {
-          alias: 'i',
+        .option('src', {
+          alias: 's',
           nargs: 1,
           describe: 'Path to folder containing lua files',
           type: 'string',
-          demandOption: true,
         })
-        .option('output', {
-          alias: 'o',
+        .option('cart', {
+          alias: 'c',
           nargs: 1,
           describe: 'Path to output .p8 file',
           type: 'string',
-          demandOption: true,
         })
         .option('executable', {
           alias: 'e',
@@ -47,13 +43,8 @@ const argv = yargs
         });
     },
     argv => {
-      if (argv.watch) {
-        watch(argv);
-      } else {
-        console.log('...building cart');
-        build(argv);
-        console.log(boxen('Done!', boxenOpts));
-      }
+      const config = new Config(argv)
+      config.watch ? watch(config) : build(config)
     }
   )
   .command(
@@ -61,10 +52,13 @@ const argv = yargs
     'Extract code from PICO-8 cart into lua file(s)',
     yargs => {
       yargs
-      .option('cart', { alias: 'c', nargs: 1, describe: 'Path to input .p8 file', type: 'string', demandOption: true })
-      .option('dest', { alias: 'd', nargs: 1, describe: 'Path to output folder', type: 'string', demandOption: false, default: '.' })
+      .option('cart', { alias: 'c', nargs: 1, describe: 'Path to input .p8 file', type: 'string' })
+      .option('src', { alias: 's', nargs: 1, describe: 'Path to output folder', type: 'string', default: '.' })
     },
-    argv => extract(argv)
+    argv => {
+      const config = new Config(argv)
+      extract(config)
+    }
   )
   .demandCommand(1)
   .example(

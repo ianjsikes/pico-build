@@ -13,9 +13,9 @@ process.on('close', () => {
   pico_process.kill('SIGINT');
 })
 
-const runBuild = argv => {
+const runBuild = config => {
   logger.clear();
-  const stats = build(argv);
+  const stats = build(config);
   logger.log(`Found ${chalk.magenta.bold(stats.numLuaFiles)} lua files:`);
   stats.luaFiles.forEach(file => {
     logger.log(`   • ${chalk.magenta(file.name)}`);
@@ -37,12 +37,12 @@ const runBuild = argv => {
   logger.render();
 
   if (pico_process) {
-    reloadCart(argv.output);
+    reloadCart(config.cartPath);
   }
 };
 
-const openCart = argv => {
-  let cmd = argv.executable || picoCmd();
+const openCart = config => {
+  let cmd = config.executable || picoCmd();
 
   if (cmd) {
     if (pico_process) {
@@ -50,7 +50,7 @@ const openCart = argv => {
       pico_process = undefined;
     }
 
-    pico_process = spawn(cmd, ['-run', argv.output]);
+    pico_process = spawn(cmd, ['-run', config.cartPath]);
     pico_process.stdout.setEncoding('utf8');
     pico_process.stdout.on('data', chunk => {
       logger.log(`${chalk.cyan('PICO-8')} ->`, chunk);
@@ -63,17 +63,17 @@ const openCart = argv => {
   }
 };
 
-export default function watch(argv) {
+export default function watch(config) {
   // Run the initial build once
-  runBuild(argv);
+  runBuild(config);
 
   // Construct the watcher
-  const luaGlob = path.join(argv.input, '**.lua');
+  const luaGlob = path.join(config.sourceDir, '**.lua');
   const watcher = chokidar.watch(luaGlob, {});
 
-  watcher.on('change', _ => runBuild(argv));
-  watcher.on('add', _ => runBuild(argv));
-  watcher.on('unlink', _ => runBuild(argv));
+  watcher.on('change', _ => runBuild(config));
+  watcher.on('add', _ => runBuild(config));
+  watcher.on('unlink', _ => runBuild(config));
 
   process.stdin.on('keypress', (ch, key) => {
     if (key.sequence === '\u0003' || key.name === 'q') {
@@ -82,10 +82,10 @@ export default function watch(argv) {
 
     switch (key.name) {
       case 'b':
-        runBuild(argv);
+        runBuild(config);
         break;
       case 'o':
-        openCart(argv);
+        openCart(config);
         break;
       case 'x':
         pico_process.kill();
