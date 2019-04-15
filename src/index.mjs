@@ -6,6 +6,7 @@ import yargs from 'yargs';
 
 import watch from './watch.mjs';
 import build from './build.mjs';
+import extract from './extract.mjs';
 
 const boxenOpts = { padding: 2, borderColor: 'green', borderStyle: 'round' };
 
@@ -54,6 +55,16 @@ const argv = yargs
         console.log(boxen('Done!', boxenOpts));
       }
     }
+  )
+  .command(
+    'extract',
+    'Extract code from PICO-8 cart into lua file(s)',
+    yargs => {
+      yargs
+      .option('cart', { alias: 'c', nargs: 1, describe: 'Path to input .p8 file', type: 'string', demandOption: true })
+      .option('dest', { alias: 'd', nargs: 1, describe: 'Path to output folder', type: 'string', demandOption: false, default: '.' })
+    },
+    argv => extract(argv)
   )
   .demandCommand(1)
   .example(
