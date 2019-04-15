@@ -1,7 +1,7 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-module.exports = function main(argv) {
+export default function build(argv) {
   const startTime = Date.now();
   const stats = {};
 
@@ -47,4 +47,4 @@ module.exports = function main(argv) {
   stats.runTime = endTime - startTime;
 
   return stats;
-};
+}

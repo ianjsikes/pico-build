@@ -1,13 +1,18 @@
-#! /usr/bin/env node
-const boxen = require('boxen');
+#!/usr/bin/env node --experimental-modules --no-warnings
+
+import boxen from 'boxen';
+import chalk from 'chalk';
+import yargs from 'yargs';
+
+import watch from './watch.mjs';
+import build from './build.mjs';
+
 const boxenOpts = { padding: 2, borderColor: 'green', borderStyle: 'round' };
-const chalk = require('chalk');
-const { watch } = require('./watch.js');
 
 // process.stdin.setEncoding('ascii');
 // process.stdin.on('data', chunk => console.log(chunk));
 
-const argv = require('yargs')
+const argv = yargs
   .usage('Usage: $0 <command> [options]')
   .command(
     'build',
@@ -45,7 +50,7 @@ const argv = require('yargs')
         watch(argv);
       } else {
         console.log('...building cart');
-        require('./build.js')(argv);
+        build(argv);
         console.log(boxen('Done!', boxenOpts));
       }
     }

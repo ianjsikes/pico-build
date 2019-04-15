@@ -1,57 +1,43 @@
-const chokidar = require('chokidar');
-const path = require('path');
-const keypress = require('keypress');
-const boxen = require('boxen');
-const { spawn } = require('child_process');
-const boxenOpts = {
-  padding: 1,
-  margin: 1,
-  borderColor: 'green',
-  borderStyle: 'round',
-};
-const chalk = require('chalk');
-const build = require('./build.js');
-const { picoCmd, reloadCart } = require('./utils.js');
+import chokidar from 'chokidar';
+import path from 'path';
+import keypress from 'keypress';
+import { spawn } from 'child_process';
+import chalk from 'chalk';
+import build from './build.mjs';
+import { picoCmd, reloadCart } from './utils.mjs';
+import * as logger from './log.mjs';
 keypress(process.stdin);
 
 let pico_process;
-
-const clearConsole = () => process.stdout.write('\033c');
+process.on('close', () => {
+  pico_process.kill('SIGINT');
+})
 
 const runBuild = argv => {
-  clearConsole();
+  logger.clear();
   const stats = build(argv);
-  console.log(`Found ${chalk.magenta.bold(stats.numLuaFiles)} lua files:`);
+  logger.log(`Found ${chalk.magenta.bold(stats.numLuaFiles)} lua files:`);
   stats.luaFiles.forEach(file => {
-    console.log(`   • ${chalk.magenta(file.name)}`);
+    logger.log(`   • ${chalk.magenta(file.name)}`);
   });
   if (stats.outputFileExists) {
-    console.log(
+    logger.log(
       `\nCopied into:\n   ${path.dirname(stats.outputFile.path)}${
         path.sep
       }${chalk.yellow(stats.outputFile.name)}`
     );
   } else {
-    console.log(
+    logger.log(
       `\nCreated new cart:\n   ${path.dirname(stats.outputFile.path)}${
         path.sep
       }${chalk.yellow(stats.outputFile.name)}`
     );
   }
   const time = new Date().toLocaleTimeString();
-  const msg = `${chalk.green.bold('Done!')}\n${chalk.white(
-    time
-  )}\n\n» Press ${chalk.yellow.bold('q')} to ${chalk.underline(
-    'q'
-  )}uit.\n» Press ${chalk.yellow.bold('b')} to manually ${chalk.underline(
-    'b'
-  )}uild.\n» Press ${chalk.yellow.bold('o')} to ${chalk.underline(
-    'o'
-  )}pen cart in PICO-8.`;
-  console.log(boxen(msg, boxenOpts));
+  logger.render();
 
   if (pico_process) {
-    reloadCart();
+    reloadCart(argv.output);
   }
 };
 
@@ -67,17 +53,17 @@ const openCart = argv => {
     pico_process = spawn(cmd, ['-run', argv.output]);
     pico_process.stdout.setEncoding('utf8');
     pico_process.stdout.on('data', chunk => {
-      console.log('PICO8:', chunk);
+      logger.log(`${chalk.cyan('PICO-8')} ->`, chunk);
     });
 
     pico_process.on('close', code => {
-      console.log('Closed with code:', code);
+      logger.log('Closed with code:', code);
       pico_process = undefined;
     });
   }
 };
 
-exports.watch = function(argv) {
+export default function watch(argv) {
   // Run the initial build once
   runBuild(argv);
 
@@ -101,8 +87,11 @@ exports.watch = function(argv) {
       case 'o':
         openCart(argv);
         break;
+      case 'x':
+        pico_process.kill();
+        break;
     }
   });
   process.stdin.setRawMode(true);
   process.stdin.resume();
-};
+}

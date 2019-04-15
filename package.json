@@ -4,14 +4,18 @@
   "main": "index.js",
   "license": "MIT",
   "bin": {
-    "pico-build": "index.js"
+    "pico-build": "src/index.mjs"
   },
   "dependencies": {
+    "ansi-diff": "^1.1.1",
+    "blessed": "^0.1.81",
     "boxen": "^3.1.0",
     "chalk": "^2.4.2",
     "chokidar": "^2.1.5",
     "command-exists": "^1.2.8",
     "keypress": "^0.2.1",
+    "log-update": "^3.2.0",
+    "window-size": "^1.1.1",
     "yargs": "^13.2.2"
   },
   "description": "A simple build tool for working with PICO-8 lua files",

@@ -1,16 +1,9 @@
-const commandExists = require('command-exists').sync;
-const os = require('os');
-const path = require('path');
-const { execSync } = require('child_process');
-const fs = require('fs');
-const boxen = require('boxen');
-const boxenOpts = {
-  padding: 1,
-  margin: 1,
-  borderColor: 'green',
-  borderStyle: 'round',
-};
-const chalk = require('chalk');
+import commandExists from 'command-exists';
+import os from 'os';
+import path from 'path';
+import fs from 'fs';
+import { execSync } from 'child_process';
+import chalk from 'chalk';
 
 const MAC_PATH = path.join(
   '/',
@@ -22,12 +15,12 @@ const MAC_PATH = path.join(
 );
 const WIN_PATH = path.join('C:', 'Program Files (x86)', 'PICO-8', 'pico8.exe');
 
-exports.picoCmd = () => {
+export const picoCmd = () => {
   if (process.env.PICO8) {
     return process.env.PICO8;
   }
 
-  if (commandExists('pico8')) {
+  if (commandExists.sync('pico8')) {
     return 'pico8';
   }
 
@@ -56,7 +49,7 @@ exports.picoCmd = () => {
   return;
 };
 
-exports.runApplescript = (...scripts) =>
+export const runApplescript = (...scripts) =>
   execSync(`osascript ${scripts.map(x => `-e '${x}'`).join(' ')}`);
 
 const activate = 'tell application "PICO-8" to activate';
@@ -69,5 +62,10 @@ delay .1
 key code 15 using control down
 end tell`;
 
-exports.reloadCart = cart =>
-  exports.runApplescript(activate, 'delay .3', loadCart(cart));
+export const reloadCart = cart => {
+  if (os.platform() === 'darwin') {
+    runApplescript(activate, 'delay .3', loadCart(cart));
+  } else {
+    console.log(`Press ${chalk.yellow('Ctrl+R')} in PICO-8 to reload cart`);
+  }
+};
