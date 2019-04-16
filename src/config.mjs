@@ -25,7 +25,7 @@ export default class Config {
     if ('open_pico' in configObj) this.openPico = configObj.open_pico
     if ('executable' in configObj) this.executable = configObj.executable
 
-    if ('src_dir' in args) this.sourceDir = args.src_dir
+    if ('src' in args) this.sourceDir = args.src
     if ('cart' in args) this.cartPath = args.cart
     if ('watch' in args) this.watch = args.watch
     if ('open_pico' in args) this.openPico = args.open_pico
