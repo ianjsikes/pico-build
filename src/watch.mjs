@@ -5,10 +5,11 @@ import { spawn } from 'child_process';
 import chalk from 'chalk';
 import build from './build.mjs';
 import { picoCmd, reloadCart } from './utils.mjs';
-import * as logger from './log.mjs';
+import Logger from './log.mjs';
 keypress(process.stdin);
 
 let pico_process;
+let logger;
 process.on('close', () => {
   pico_process.kill('SIGINT');
 })
@@ -64,6 +65,7 @@ const openCart = config => {
 };
 
 export default function watch(config) {
+  logger = new Logger();
   // Run the initial build once
   runBuild(config);
 
