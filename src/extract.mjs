@@ -2,19 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import mkdirp from 'mkdirp';
 import Jimp from 'jimp';
+import _ from 'lodash';
 
 import decodePng from './decode-png.mjs';
-
-const getTabName = (tab, index) => {
-  let firstLine = tab.trim().split('\n')[0].trim()
-  if (firstLine.startsWith('--')) {
-    let tabName = firstLine.slice(2).trim().replace(/([^a-z0-9]+)/gi, '-')
-    if (tabName) {
-      return `${index}.${tabName}.lua`
-    }
-  }
-  return `${index}.lua`
-}
+import P8Cart from './p8-cart.mjs';
 
 export default async function extract(config) {
   try {
@@ -29,20 +20,22 @@ export default async function extract(config) {
       cartSrc = fs.readFileSync(config.cartPath, 'utf8')
     }
 
-    let code = cartSrc.split('__lua__')[1].split('__gfx__')[0]
-    let tabs = code.split('-->8\n')
+    let cart = P8Cart.fromCartSource(cartSrc);
 
-    stats.numLuaFiles = tabs.length
+    stats.numLuaFiles = cart.tabs.length
     stats.luaFiles = [];
 
     if (!fs.existsSync(config.sourceDir)) {
       mkdirp.sync(config.sourceDir)
     }
 
-    tabs.forEach((tab, index) => {
-      let name = getTabName(tab, index)
+    cart.tabs.forEach((tab, index) => {
+      let name = tab.title ?
+        `${index}.${_.kebabCase(tab.title)}.lua` :
+        `${index}.lua`;
+      
       let filePath = path.join(config.sourceDir, name)
-      fs.writeFileSync(filePath, tab)
+      fs.writeFileSync(filePath, tab.code)
 
       stats.luaFiles.push({ name, path: filePath })
     })
