@@ -28,13 +28,13 @@ const runBuild = config => {
     logger.log(
       `\nCopied into:\n   ${path.dirname(stats.outputFile.path)}${
         path.sep
-      }${chalk.yellow(stats.outputFile.name)}`
+      }${chalk.yellow(stats.outputFile.name)}\n`
     );
   } else {
     logger.log(
       `\nCreated new cart:\n   ${path.dirname(stats.outputFile.path)}${
         path.sep
-      }${chalk.yellow(stats.outputFile.name)}`
+      }${chalk.yellow(stats.outputFile.name)}\n`
     );
   }
   const time = new Date().toLocaleTimeString();
@@ -57,7 +57,7 @@ const openCart = config => {
     pico_process = spawn(cmd, ['-run', config.cartPath]);
     pico_process.stdout.setEncoding('utf8');
     pico_process.stdout.on('data', chunk => {
-      logger.log(`${chalk.cyan('PICO-8')} ->`, chunk);
+      logger.log(`${chalk.cyan('PICO-8:')} `, chunk.trim());
     });
 
     pico_process.on('close', code => {
@@ -83,6 +83,7 @@ export default function watch(config) {
 
   process.stdin.on('keypress', (ch, key) => {
     if (key.sequence === '\u0003' || key.name === 'q') {
+      pico_process && pico_process.kill();
       process.exit();
     }
 
@@ -94,7 +95,7 @@ export default function watch(config) {
         openCart(config);
         break;
       case 'x':
-        pico_process.kill();
+        pico_process && pico_process.kill();
         break;
     }
   });
