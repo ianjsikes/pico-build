@@ -1,6 +1,6 @@
 export default class P8Cart {
   constructor() {
-    this.rawLua = ''
+    this.version = 16
     this.gfx = ''
     this.gff = ''
     this.label = ''
@@ -10,6 +10,38 @@ export default class P8Cart {
     this.tabs = []
     this.title = ''
     this.description = ''
+  }
+
+  get rawLua() {
+    return this.tabs.map(({ code }) => code).join('\n-->8\n')
+  }
+
+  set rawLua(lua) {
+    this.tabs = []
+    if (!lua) {
+      this.title = ''
+      this.description = ''
+      return
+    }
+
+    let luaLines = lua.trim().split('\n')
+    if (luaLines[0].startsWith('--') && luaLines[1].startsWith('--')) {
+      this.title = luaLines[0].slice(2)
+      this.description = luaLines[1].slice(2)
+    }
+
+    let tabs = lua.trim().split('\n-->8\n').map(tab => tab.trim())
+    for (const tab of tabs) {
+      let title;
+      if (tab.startsWith('--')) {
+        title = tab.split('\n')[0].trim().slice(2).trim()
+      }
+      this.tabs.push({ title, code: tab })
+    }
+  }
+
+  setTab(index, code, title) {
+    this.tabs[index] = { title, code }
   }
 
   static fromCartSource(cart) {
@@ -52,28 +84,12 @@ export default class P8Cart {
     p8Cart.sfx = sections.__sfx__
     p8Cart.music = sections.__music__
 
-    let luaLines = sections.__lua__.split('\n')
-    if (luaLines[0].startsWith('--') && luaLines[1].startsWith('--')) {
-      p8Cart.title = luaLines[0].slice(2)
-      p8Cart.description = luaLines[1].slice(2)
-    }
-
-    p8Cart.tabs = []
-    let tabs = sections.__lua__.split('\n-->8\n').map(tab => tab.trim())
-    for (const tab of tabs) {
-      let title;
-      if (tab.startsWith('--')) {
-        title = tab.split('\n')[0].trim().slice(2).trim()
-      }
-      p8Cart.tabs.push({ title, code: tab })
-    }
-
     return p8Cart
   }
 
   toCartSource() {
     let src = `pico-8 cartridge // http://www.pico-8.com\nversion ${this.version}\n`
-    if (this.rawLua) src += `__lua__\n${this.rawLua}\n`
+    if (this.tabs) src += `__lua__\n${this.rawLua}\n`
     if (this.gfx) src += `__gfx__\n${this.gfx}\n`
     if (this.gff) src += `__gff__\n${this.gff}\n`
     if (this.label) src += `__label__\n${this.label}\n`
