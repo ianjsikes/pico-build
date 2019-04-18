@@ -6,6 +6,7 @@ import yargs from 'yargs';
 import watch from './watch.mjs';
 import build from './build.mjs';
 import extract from './extract.mjs';
+import init from './init.mjs';
 import Config from './config.mjs';
 
 // process.stdin.setEncoding('ascii');
@@ -58,6 +59,14 @@ const argv = yargs
     argv => {
       const config = new Config(argv)
       extract(config)
+    }
+  )
+  .command(
+    'init',
+    'Initialize a PICO-8 project folder',
+    () => {},
+    async argv => {
+      await init()
     }
   )
   .demandCommand(1)
