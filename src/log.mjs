@@ -1,15 +1,25 @@
 import chalk from 'chalk';
 import blessed from 'blessed';
 
+const doneBoxContent = () => `${chalk.white(
+  new Date().toLocaleTimeString()
+)}\n\n» Press ${chalk.yellow.bold('q')} to ${chalk.underline(
+  'q'
+)}uit.\n» Press ${chalk.yellow.bold('b')} to manually ${chalk.underline(
+  'b'
+)}uild.\n» Press ${chalk.yellow.bold('o')} to ${chalk.underline(
+  'o'
+)}pen cart in PICO-8.`
+
 export default class Logger {
   constructor() {
     this.screen = blessed.screen({ smartCSR: true })
-    screen.title = 'PICO-BUILD'
+    this.screen.title = 'PICO-BUILD'
 
     this.lines = []
 
     this.LogBox = blessed.box({
-      parent: screen,
+      parent: this.screen,
       style: { bg: 'purple' },
       content: '',
       scrollable: true,
@@ -29,7 +39,7 @@ export default class Logger {
     this.LogBox.focus();
 
     this.DoneBox = blessed.box({
-      parent: screen,
+      parent: this.screen,
       bottom: 1,
       left: 1,
       width: 'shrink',
@@ -38,15 +48,7 @@ export default class Logger {
       border: { type: 'line' },
       padding: { left: 2, right: 2, top: 1, bottom: 1 },
       style: { border: { fg: 'green' } },
-      content: `${chalk.white(
-        new Date().toLocaleTimeString()
-      )}\n\n» Press ${chalk.yellow.bold('q')} to ${chalk.underline(
-        'q'
-      )}uit.\n» Press ${chalk.yellow.bold('b')} to manually ${chalk.underline(
-        'b'
-      )}uild.\n» Press ${chalk.yellow.bold('o')} to ${chalk.underline(
-        'o'
-      )}pen cart in PICO-8.`,
+      content: doneBoxContent(),
     });
 
     this.screen.key(['escape', 'q', 'C-c'], () => process.exit(0));
@@ -55,6 +57,7 @@ export default class Logger {
   render() {
     this.LogBox.setContent(this.lines.join('\n'));
     this.LogBox.setScrollPerc(100);
+    this.DoneBox.setContent(doneBoxContent())
     this.screen.render();
   }
 
