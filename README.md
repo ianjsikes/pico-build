@@ -1,6 +1,10 @@
 # pico-build
 An all-purpose command-line tool for building PICO-8 games. Write your game as multiple lua files, and have them compiled into tabs within your `.p8` cart.
 
+In watch mode, you can launch your cart in PICO-8 from the command line. Calls to `printh()` in your game will be logged in the terminal. PICO-8 will automatically reload when you change a file (currently MacOS only).
+
+![demo](assets/pico-demo.gif)
+
 ## Quickstart
 ```
 $ npm i -g pico-build
