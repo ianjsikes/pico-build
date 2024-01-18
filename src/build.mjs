@@ -21,7 +21,9 @@ export default function build(config) {
 
   let luaFilePaths = fs
     .readdirSync(config.sourceDir)
-    .filter(file => file.endsWith('.lua'));
+    .filter(file => file.endsWith('.lua'))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
 
   stats.numLuaFiles = luaFilePaths.length;
   stats.luaFiles = [];
